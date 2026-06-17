@@ -62,29 +62,43 @@ La arquitectura aplica el patrón Medallion sobre un flujo de streaming continuo
 │  ORD002  │ CUST102    │ Vancouver│ Canada  │ ITEM1003  │ USB-C Hub      │ Packed         │
 └─────────────────────────────────────────────────────────────┘
 
-graph TD
-    subgraph Bronze ["🟫 BRONZE (Raw Nested JSON)"]
-        A["{ order_id: 'ORD001', customer: { location: { city: 'Toronto' }, items: [ {...}, {...} ] }"]
-    end
+________________________________________________________________________________________________________________________________________________________________________________________________________________
+🧠 Decisiones Arquitectónicas 
+________________________________________________________________________________________________________________________________________________________________________________________________________________
 
-    subgraph Silver ["🔵 SILVER (Flat Relational Table)"]
-        B["order_id: ORD001 | CUST101 | Toronto | Canada | ITEM1001 | Wireless Mouse | Order Placed"]
-        C["order_id: ORD001 | CUST101 | Toronto | Canada | ITEM1002 | Mech. Keyboard | Packed"]
-        D["order_id: ORD001 | CUST101 | Toronto | Canada | ITEM1001 | Wireless Mouse | Shipped"]
-    end
+**1. Flattening Inteligente de JSON Anidado**
+Un error común en Data Engineering es usar explode sin cuidado, lo cual genera una explosión de filas (Row Explosion).
+Este proyecto demuestra cómo extraer profundo en Structs anidados (ej. customer.location.city) y aplicar explode solo en los Arrays reales (items, delivery_updates), evitando la creación de miles de filas nulas o corruptas.
 
-    A -->|Flattening & Explode Arrays| B
-    B --> C
-    C --> D
-```
+**2. Carga Incremental (SCD Tipo 1 - Upsert)**
+El problema: Si haces un append(), la orden ORD001 aparecerá dos veces si el evento llega dos veces.
+La solución: El uso de MERGE INTO... ON order_id WHEN MATCHED THEN UPDATE. Si la clave ya existe en el Warehouse, actualiza la fila en lugar de crear una nueva. Si es nueva, la inserta. Garantiza la integridad de los datos históricos.
 
----
+**3. Modularidad con Programación Orientada a Objetos (OOP)**
+En lugar de escribir un script gigante e ilegible de 300 líneas, el código utiliza Clases de Python (DataValidation, DataTransformer). Esto demuestra separación de responsabilidades (Single Responsibility), facilidad de pruebas unitarias y un código limpio listo para producción.
+________________________________________________________________________________________________________________________________________________________________________________________________________________
 
-### ¿Por qué este diagrama le gusta a los reclutadores?
+📊 Prueba Visual: Incremental Load en Acción
+________________________________________________________________________________________________________________________________________________________________________________________________________________
 
-1. **Muestra el problema visualmente:** Al poner el JSON anidado arriba y la tabla limpia abajo, el reclutador ve de un vistazo cuál es el problema que estás resolviendo (datos altamente desordenados vs. datos ordenados).
-2. **Muestra la "Row Explosion":** El hecho de que `ORD001` aparezca 3 veces en la tabla de abajo demuestra que entendes cómo funciona `explode()` internamente y cómo se maneja la cardinalidad de los Arrays.
-3. **Muestra Extracción Profunda:** Al listar "city" y "country" separados en la tabla de abajo, demuestras que sabes navegar por Structs anidados (2 niveles de profundidad: `customer` $\rightarrow$ `location` $\rightarrow$ `city`), lo cual es un dolor de cabeza en Spark que solo los Intermedios/Seniors dominan.
+La mejor manera de demostrar un Upsert es ver cómo se comportan los datos a través del tiempo. Aquí está la evolución de la Orden ORD001 en el Data Warehouse:
+
+run_id
+order_id
+order_date
+amount
+¿Qué pasó en el Data Warehouse?
+1 (Inicial)	1	2025-08-02	246.84	Se insertó por primera vez.
+2, 3, 4	1	2025-08-05	246.84	No cambió. El evento fue recibido, pero el monto era igual. Se ignora el UPSERT.
+6 (Actualización)	1	2026-08-11	248.69	Se ACTUALIZÓ el monto de $246.84 a $248.69 sin tocar el historial.
+
+| run_id | order_id | order_date | amount | ¿Qué pasó en el Data Warehouse? |
+|:---:|:---|:---|:---|:---|
+| 1 (Inicial) | 1 | 2025-08-02 | 246.84 | Se insertó por primera vez. |
+| 2, 3, 4 | 1 | 2025-08-05 | 246.84 | No cambió. El evento fue recibido, pero el monto era igual. Se ignora el UPSERT.
+| **6 (Actualización)** | 1 | 2026-08-11 | **248.69** | **Se ACTUALIZÓ el monto de $246.84 a $248.69 sin tocar el historial.**
+
+
 ![image]()
 
 ![image]()
