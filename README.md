@@ -14,13 +14,16 @@ ________________________________________________________________________________
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
 La arquitectura aplica el patrón Medallion sobre un flujo de streaming continuo:
 
-🔧 BRONZE (Raw)└── Estructura Original (JSON Anidado Complejo)    
-├── order_id: "ORD001"    ├── customer: { location: { city: "Toronto", country: "Canada" }    
-└── items: [ {item_id: "ITEM1001"}, {item_id: "ITEM1002"} ]            │            
+🔧 BRONZE (Raw)└── Estructura Original (JSON Anidado Complejo) 
+
+├── order_id: "ORD001" ├── customer: { location: { city: "Toronto", country: "Canada" } └── items: [ {item_id: "ITEM1001"}, {item_id: "ITEM1002"} ] │
+
 ▼ (Flattening / Aplanado con explode())│📋 SILVER (Staging Data)
-├── order_id: "ORD001"├── city: "Toronto"├── country: "Canada"├── item_id: "ITEM1001"├── product_name: "Wireless Mouse"└── quantity: 2            │ 
+
+├── order_id: "ORD001"├── city: "Toronto"├── country: "Canada"├── item_id: "ITEM1001"├── product_name: "Wireless Mouse"└── quantity: 2 │ 
 
 ▼ (Incremental Load / MERGE INTO)  │❄️ GOLD (Data Warehouse - Delta Table)
+
 ├── order_id: "ORD001" (Clave Primaria)├── city: "Toronto"├── country: "Canada"└── amount: 250.75
 
 
@@ -82,15 +85,6 @@ ________________________________________________________________________________
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 La mejor manera de demostrar un Upsert es ver cómo se comportan los datos a través del tiempo. Aquí está la evolución de la Orden ORD001 en el Data Warehouse:
-
-run_id
-order_id
-order_date
-amount
-¿Qué pasó en el Data Warehouse?
-1 (Inicial)	1	2025-08-02	246.84	Se insertó por primera vez.
-2, 3, 4	1	2025-08-05	246.84	No cambió. El evento fue recibido, pero el monto era igual. Se ignora el UPSERT.
-6 (Actualización)	1	2026-08-11	248.69	Se ACTUALIZÓ el monto de $246.84 a $248.69 sin tocar el historial.
 
 | run_id | order_id | order_date | amount | ¿Qué pasó en el Data Warehouse? |
 |:---:|:---|:---|:---|:---|
