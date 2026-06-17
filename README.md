@@ -145,7 +145,7 @@ Lo que estás viendo aquí se conoce en la industria como un patrón "Bootstrap 
 **[HASHTAG 1]** Importamos la clase específica de Delta Lake que nos permite usar la función MERGE (Upsert).
 from delta.tables import DeltaTable
 
-try:
+try
     # [HASHTAG 2] Intentamos apuntar a un directorio que YA debería contener una tabla Delta existente.
     # Si es la primera vez que corres esto y la carpeta está vacía, esta línea FALLARÁ y saltará al 'except'.
     dlt_obj = DeltaTable.forPath(spark, "/Volumes/pyspark_catalogo/source/db_volume/products_sink/")
