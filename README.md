@@ -454,7 +454,9 @@ o	keyCol: La columna que identifica la entidad (ej. order_id).
 o	cdcCol: La columna que marca el tiempo de la última actualización (ej. update_timestamp). Nota: "cdc" significa Change Data Capture, la técnica de rastrear cambios.
 
 Código:
-        df = self.df.withColumn("dedup", row_number().over(Window.partitionBy("keyCol").orderBy(desc(cdcCol))))
+
+         df = self.df.withColumn("dedup", row_number().over(Window.partitionBy("keyCol").orderBy(desc(cdcCol))))
+
 
 •	Línea por línea:
 o	Window.partitionBy("keyCol"): Le dice a Spark: "Agrupa todos los registros que tengan el mismo order_id en la misma partición".
@@ -463,14 +465,16 @@ o	row_number(): Asigna el número 1 a la fila más reciente, el 2 a la siguiente
 o	.withColumn("dedup", ...): Crea una nueva columna temporal llamada dedup con esos números.
 
 Código:
-        df = df.filter(col('dedup') == 1).drop("dedup")
+
+         df = df.filter(col('dedup') == 1).drop("dedup")
+
         
 •	Qué hace: Filtra el DataFrame para solo conservar las filas donde el número asignado sea 1 (las más recientes). Luego borra la columna temporal dedup porque ya no la necesitas.
 •	El resultado: Tu DataFrame quedará limpio, sin duplicados, conservando el registro más actualizado de cada entidad.
 
 Código:
 
-        return df
+         return df
 
 •	Qué hace: Devuelve el DataFrame limpio y sobrescribe self.df (nota: en realidad debería ser self.df = df... return self.df para que el siguiente método use los datos deduplicados, pero asumo que es un error de tu código original. Te lo explico abajo).
 
@@ -478,13 +482,15 @@ El Método removeNulls (Limpieza de datos faltantes)
 
 Código:
 
-        def removeNulls(self, nullCol):
+         def removeNulls(self, nullCol):
+
 
 •	Qué hace: Recibe el nombre de una columna específica a revisar.
 
 Código:
 
-        df = self.df.filter(col(nullCol).isNotNull())
+         df = self.df.filter(col(nullCol).isNotNull())
+
         
 •	Línea por línea:
 o	col(nullCol): Apunta a la columna (ej. col("email")).
@@ -493,7 +499,8 @@ o	.filter(...): Elimina todas las filas donde la condición sea False (las que t
 
 Código:
 
-        return df
+         return df
+
         
 •	Qué hace: Devuelve el DataFrame sin las filas que tenían nulos en esa columna.
 
