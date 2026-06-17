@@ -15,10 +15,13 @@ ________________________________________________________________________________
 La arquitectura aplica el patrón Medallion sobre un flujo de streaming continuo:
 
 🔧 BRONZE (Raw)└── Estructura Original (JSON Anidado Complejo)    
-├── order_id: "ORD001"    ├── customer: { location: { city: "Toronto", country: "Canada" }    └── items: [ {item_id: "ITEM1001"}, {item_id: "ITEM1002"} ]            │            
-▼ (Flattening / Aplanado con explode())│📋 SILVER (Staging Data)├── order_id: "ORD001"├── city: "Toronto"├── country: "Canada"├── item_id: "ITEM1001"├── product_name: "Wireless Mouse"└── quantity: 2            │ 
+├── order_id: "ORD001"    ├── customer: { location: { city: "Toronto", country: "Canada" }    
+└── items: [ {item_id: "ITEM1001"}, {item_id: "ITEM1002"} ]            │            
+▼ (Flattening / Aplanado con explode())│📋 SILVER (Staging Data)
+├── order_id: "ORD001"├── city: "Toronto"├── country: "Canada"├── item_id: "ITEM1001"├── product_name: "Wireless Mouse"└── quantity: 2            │ 
 
-▼ (Incremental Load / MERGE INTO)            │❄️ GOLD (Data Warehouse - Delta Table)├── order_id: "ORD001" (Clave Primaria)├── city: "Toronto"├── country: "Canada"└── amount: 250.75
+▼ (Incremental Load / MERGE INTO)  │❄️ GOLD (Data Warehouse - Delta Table)
+├── order_id: "ORD001" (Clave Primaria)├── city: "Toronto"├── country: "Canada"└── amount: 250.75
 
 
 ┌─────────────────────────────────────────────────────────────┐
