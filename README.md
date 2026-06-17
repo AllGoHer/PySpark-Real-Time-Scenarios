@@ -15,44 +15,6 @@ ________________________________________________________________________________
 
 ![image](https://github.com/user-attachments/assets/8dc82719-b05d-4aab-9cc7-2c3c8dca8e91)
 
-┌─────────────────────────────────────────────────────────────┐
-│  📁 BRONZE: JSON Anidado crudo (Tal como llega de la API)   │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  {                                                          │
-│    "order_id": "ORD001",                                    │
-│    "customer": {                                            │
-│      "customer_id": "CUST101",                              │
-│      "location": {                                          │
-│        "city": "Toronto",                                   │
-│        "country": "Canada"                                  │
-│      }                                                      │
-│    },                                                       │
-│    "items": [                                               │
-│      { "item_id": "ITEM1001", "product_name": "Mouse" },    │
-│      { "item_id": "ITEM1002", "product_name": "Keyboard" }  │
-│    ],                                                       │
-│    "delivery_updates": ["Placed", "Packed", "Shipped"]      │
-│  }                                                          │
-└─────────────────────────────────────────────────────────────┘
-                             │
-                             ▼
-                             ▼
-(Transformación: `explode()` de Arrays y Extracción de Structs)
-                             │
-┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  📊 SILVER: Tabla Relacional Aplanada (Listo para el Warehouse)                               │
-├────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                                │
-│  order_id │ customer_id │ city     │ country │ item_id  │ product_name  │ delivery_updates     │
-│ ─────────┼───────────┼──────────┼─────────┼────────┼──────────┼───────────────┼────────────────┤
-│  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1001  │ Wireless Mouse  │ Order Placed        │
-│  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1002  │ Mech. Keyboard │ Packed               │
-│  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1001  │ Wireless Mouse  │ Shipped             │
-│  ORD002  │ CUST102    │ Vancouver│ Canada  │ ITEM1003  │ USB-C Hub      │ Order Placed         │
-│  ORD002  │ CUST102    │ Vancouver│ Canada  │ ITEM1003  │ USB-C Hub      │ Packed               │
-└────────────────────────────────────────────────────────────────────────────────────────────────┘
-
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
 🧠 Decisiones Arquitectónicas 
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -153,8 +115,8 @@ Creamos un objeto delta con el siguiente código.
 
 Código:
 
-        # Creating Delta Object
-
+          # Creating Delta Object
+          
          from delta.tables import DeltaTable
 
         try:
@@ -178,8 +140,9 @@ Lo que estás viendo aquí se conoce en la industria como un patrón "Bootstrap 
 
 **•	En el siguiente bloque explico a detalle que es lo hace cada línea de código para mayor comprensión**
 
-# Creating Delta Object
-# [HASHTAG 1] Importamos la clase específica de Delta Lake que nos permite usar la función MERGE (Upsert).
+#### Creating Delta Object
+
+**[HASHTAG 1]** Importamos la clase específica de Delta Lake que nos permite usar la función MERGE (Upsert).
 from delta.tables import DeltaTable
 
 try:
