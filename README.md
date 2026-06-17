@@ -13,41 +13,75 @@ ________________________________________________________________________________
 ## 🏗️ Arquitectura del Pipeline (Bronze → Silver)
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
 ┌─────────────────────────────────────────────────────────────┐
+
 │  📁 BRONZE: JSON Anidado crudo (Tal como llega de la API)   │
+
 ├─────────────────────────────────────────────────────────────┤
+
 │                                                             │
+
 │  {                                                          │
+
 │    "order_id": "ORD001",                                    │
+
 │    "customer": {                                            │
+
 │      "customer_id": "CUST101",                              │
+
 │      "location": {                                          │
+
 │        "city": "Toronto",                                   │
+
 │        "country": "Canada"                                  │
+
 │      }                                                      │
+
 │    },                                                       │
+
 │    "items": [                                               │
+
 │      { "item_id": "ITEM1001", "product_name": "Mouse" },    │
+
 │      { "item_id": "ITEM1002", "product_name": "Keyboard" }  │
+
 │    ],                                                       │
+
 │    "delivery_updates": ["Placed", "Packed", "Shipped"]      │
+
 │  }                                                          │
+
 └─────────────────────────────────────────────────────────────┘
+
                              │
                              ▼
+                             
                              ▼
 (Transformación: `explode()` de Arrays y Extracción de Structs)
+
                              │
+                             
 ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+
 │  📊 SILVER: Tabla Relacional Aplanada (Listo para el Warehouse)                               │
+
 ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+
 │                                                                                                │
+
 │  order_id │ customer_id │ city     │ country │ item_id  │ product_name  │ delivery_updates     │
+
 │ ─────────┼───────────┼──────────┼─────────┼────────┼──────────┼───────────────┼────────────────┤
+
 │  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1001  │ Wireless Mouse  │ Order Placed        │
+
 │  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1002  │ Mech. Keyboard │ Packed               │
+
 │  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1001  │ Wireless Mouse  │ Shipped             │
+
 │  ORD002  │ CUST102    │ Vancouver│ Canada  │ ITEM1003  │ USB-C Hub      │ Order Placed         │
+
 │  ORD002  │ CUST102    │ Vancouver│ Canada  │ ITEM1003  │ USB-C Hub      │ Packed               │
+
 └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
