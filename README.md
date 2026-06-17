@@ -12,6 +12,9 @@ Este proyecto implementa un pipeline ETL robusto que simula el comportamiento de
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
 ## 🏗️ Arquitectura del Pipeline (Bronze → Silver)
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+![image](https://github.com/user-attachments/assets/8dc82719-b05d-4aab-9cc7-2c3c8dca8e91)
+
 ┌─────────────────────────────────────────────────────────────┐
 │  📁 BRONZE: JSON Anidado crudo (Tal como llega de la API)   │
 ├─────────────────────────────────────────────────────────────┤
@@ -81,20 +84,7 @@ ________________________________________________________________________________
 📂 Estructura del Proyecto
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
 
-├── data/
-│   ├── raw_data.json                 # JSON anidado original
-│   ├── orders_initial.csv            # Estado inicial del Data Warehouse
-│   └── orders_incremental.csv         # Estado después de múltiples Upserts
-├── scripts/
-│   ├── main.py                      # Orquestador del flujo (Pipeline)
-│   ├── utils/
-│   │   ├── data_validation.py        # Limpieza de nulos y deduplicación
-│   │   └── data_transformer.py       # Aplanado de JSON y preparación para el Upsert
-├── requirements.txt
-└── README.md
-
-
-![image]()
+![image](https://github.com/user-attachments/assets/cc072a23-d68b-4cd3-9e3c-4bfcffa508fb)
 
 ![image]()
 
