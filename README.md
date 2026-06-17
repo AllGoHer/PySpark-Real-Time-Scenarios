@@ -153,7 +153,7 @@ from delta.tables import DeltaTable
 Si es la primera vez que corres esto y la carpeta está vacía, esta línea FALLARÁ y saltará al 'except'.
     
     
-    dlt_obj = DeltaTable.forPath(spark, "/Volumes/pyspark_catalogo/source/db_volume/products_sink/")
+       dlt_obj = DeltaTable.forPath(spark, "/Volumes/pyspark_catalogo/source/db_volume/products_sink/")
 
 
 **[HASHTAG 3]** Iniciamos la instrucción MERGE. 
@@ -161,7 +161,7 @@ Si es la primera vez que corres esto y la carpeta está vacía, esta línea FALL
 * "src" es un alias (Source) para referirse al DataFrame 'df' que acaba de llegar con datos nuevos.
 
 
-    dlt_obj.alias("trg").merge(
+        dlt_obj.alias("trg").merge(
         
 
 **[HASHTAG 4]** Esta es la CLAVE PRIMARIA. Le decimos a Spark: "Empareja la fila nueva con la vieja si el 'id' es igual".
