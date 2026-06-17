@@ -146,43 +146,69 @@ Lo que estás viendo aquí se conoce en la industria como un patrón "Bootstrap 
 from delta.tables import DeltaTable
 
 try
-    # [HASHTAG 2] Intentamos apuntar a un directorio que YA debería contener una tabla Delta existente.
-    # Si es la primera vez que corres esto y la carpeta está vacía, esta línea FALLARÁ y saltará al 'except'.
-    dlt_obj = DeltaTable.forPath(spark, "/Volumes/pyspark_catalogo/source/db_volume/products_sink/")
+    
+**[HASHTAG 2]** Intentamos apuntar a un directorio que YA debería contener una tabla Delta existente.
+Si es la primera vez que corres esto y la carpeta está vacía, esta línea FALLARÁ y saltará al 'except'.
+    
+    
+dlt_obj = DeltaTable.forPath(spark, "/Volumes/pyspark_catalogo/source/db_volume/products_sink/")
 
-    # [HASHTAG 3] Iniciamos la instrucción MERGE. 
-    # "trg" es un alias (Target) para referirse a los datos que YA están guardados en el disco.
-    # "src" es un alias (Source) para referirse al DataFrame 'df' que acaba de llegar con datos nuevos.
-    dlt_obj.alias("trg").merge(
+
+**[HASHTAG 3]** Iniciamos la instrucción MERGE. 
+* "trg" es un alias (Target) para referirse a los datos que YA están guardados en el disco.
+* "src" es un alias (Source) para referirse al DataFrame 'df' que acaba de llegar con datos nuevos.
+
+  dlt_obj.alias("trg").merge(
         
-        # [HASHTAG 4] Esta es la CLAVE PRIMARIA. Le decimos a Spark: "Empareja la fila nueva con la vieja si el 'id' es igual".
+
+**[HASHTAG 4]** Esta es la CLAVE PRIMARIA. Le decimos a Spark: "Empareja la fila nueva con la vieja si el 'id' es igual".
+        
         df.alias("src"),
         "src.id = trg.id")\
         
-        # [HASHTAG 5] CONDICIÓN DE ACTUALIZACIÓN (Update). 
-        # Si el ID ya existe (Matched), SOLO actualiza TODAS las columnas SI la fecha del dato nuevo es mayor o igual a la vieja.
-        # ESTO ES CRÍTICO EN TIEMPO REAL: Evita que un dato atrasado (Late Data) sobrescriba un dato más reciente.
-        .whenMatchedUpdatedAll(condition="src.updateDate >= trg.updateDate")\
+**[HASHTAG 5]** CONDICIÓN DE ACTUALIZACIÓN (Update). 
+       
+* Si el ID ya existe (Matched), SOLO actualiza TODAS las columnas SI la fecha del dato nuevo es mayor o igual a la vieja.
+* ESTO ES CRÍTICO EN TIEMPO REAL: Evita que un dato atrasado (Late Data) sobrescriba un dato más reciente.
+
+
+   .whenMatchedUpdatedAll(condition="src.updateDate >= trg.updateDate")\
         
-        # [HASHTAG 6] CONDICIÓN DE INSERCIÓN (Insert).
-        # Si el ID NO existe en la tabla del disco (Not Matched), inserta la fila completamente nueva.
+
+**[HASHTAG 6]** CONDICIÓN DE INSERCIÓN (Insert).
+        
+* Si el ID NO existe en la tabla del disco (Not Matched), inserta la fila completamente nueva.
+
+
         .whenNotMatchedInsertAll()\
         
-        # [HASHTAG 7] .execute() es obligatorio. Hasta aquí solo le hemos dicho a Spark "el plan" de lo que quiere hacer. 
-        # Esta línea es la que realmente dispara el trabajo en el clúster y ejecuta el Upsert.
-        .execute()
+
+**[HASHTAG 7]** .execute() es obligatorio. Hasta aquí solo le hemos dicho a Spark "el plan" de lo que quiere hacer. 
+* Esta línea es la que realmente dispara el trabajo en el clúster y ejecuta el Upsert.
+
+
+  .execute()
     
-    # [HASHTAG 8] Si todo lo de arriba funcionó, imprime esto.
+
+**[HASHTAG 8]** Si todo lo de arriba funcionó, imprime esto.
+   
+    
     print("This is upserting now")
 
-# [HASHTAG 9] El bloque 'except' es el "Plan B". Se ejecuta SOLO si la línea [HASHTAG 2] falló.
+**[HASHTAG 9]** El bloque 'except' es el "Plan B". Se ejecuta SOLO si la línea [HASHTAG 2] falló.
+
+
 except:
     
-    # [HASHTAG 10] Como la tabla no existía (era la primera vez), simplemente tomamos el DataFrame actual 
-    # y lo guardamos desde cero sobreescribiendo la carpeta. Esto "inicializa" o "crea" la tabla Delta.
-    df.write.format("delta")\
+   
+**[HASHTAG 10]** Como la tabla no existía (era la primera vez), simplemente tomamos el DataFrame actual 
+* y lo guardamos desde cero sobreescribiendo la carpeta. Esto "inicializa" o "crea" la tabla Delta.
+
+
+   df.write.format("delta")\
         .mode("Overwrite")\
         .save("/Volumes/pyspark_catalogo/source/db_volume/products_sink/")
+
 
 
 ### 🧠 NOTA (Contexto del Scenario)
