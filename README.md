@@ -26,45 +26,6 @@ La arquitectura aplica el patrón Medallion sobre un flujo de streaming continuo
 
 ├── order_id: "ORD001" (Clave Primaria)├── city: "Toronto"├── country: "Canada"└── amount: 250.75
 
-
-┌─────────────────────────────────────────────────────────────┐
-│  📁 BRONZE: JSON Anidado crudo (Tal como llega de la API)  │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  {                                                          │
-│    "order_id": "ORD001",                                    │
-│    "customer": {                                            │
-│      "customer_id": "CUST101",                              │
-│      "location": {                                          │
-│        "city": "Toronto",                                   │
-│        "country": "Canada"                                  │
-│      }                                                      │
-│    },                                                       │
-│    "items": [                                               │
-│      { "item_id": "ITEM1001", "product_name": "Mouse" },    │
-│      { "item_id": "ITEM1002", "product_name": "Keyboard" }  │
-│    ],                                                       │
-│    "delivery_updates": ["Placed", "Packed", "Shipped"]      │
-│  }                                                          │
-└─────────────────────────────────────────────────────────────┘
-                             │
-                             ▼
-                             ▼
-(Transformación: `explode()` de Arrays y Extracción de Structs)
-                             │
-┌──────────────────────────────────────────────────────────────────┐
-│  📊 SILVER: Tabla Relacional Aplanada (Listo para el Warehouse)  │
-├──────────────────────────────────────────────────────────────────┤
-│                                                             │
-│  order_id │ customer_id │ city     │ country │ item_id  │ product_name  │ delivery_updates  │
-│ ─────────┼───────────┼──────────┼─────────┼────────┼──────────┼───────────────┼─────────────────┤
-│  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1001  │ Wireless Mouse  │ Order Placed   │
-│  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1002  │ Mech. Keyboard │ Packed         │
-│  ORD001  │ CUST101    │ Toronto  │ Canada  │ ITEM1001  │ Wireless Mouse  │ Shipped        │
-│  ORD002  │ CUST102    │ Vancouver│ Canada  │ ITEM1003  │ USB-C Hub      │ Order Placed   │
-│  ORD002  │ CUST102    │ Vancouver│ Canada  │ ITEM1003  │ USB-C Hub      │ Packed         │
-└─────────────────────────────────────────────────────────────┘
-
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
 🧠 Decisiones Arquitectónicas 
 ________________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -91,6 +52,22 @@ La mejor manera de demostrar un Upsert es ver cómo se comportan los datos a tra
 | 1 (Inicial) | 1 | 2025-08-02 | 246.84 | Se insertó por primera vez. |
 | 2, 3, 4 | 1 | 2025-08-05 | 246.84 | No cambió. El evento fue recibido, pero el monto era igual. Se ignora el UPSERT.
 | **6 (Actualización)** | 1 | 2026-08-11 | **248.69** | **Se ACTUALIZÓ el monto de $246.84 a $248.69 sin tocar el historial.**
+
+________________________________________________________________________________________________________________________________________________________________________________________________________________
+📂 Estructura del Proyecto
+________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+├── data/
+│   ├── raw_data.json                 # JSON anidado original
+│   ├── orders_initial.csv            # Estado inicial del Data Warehouse
+│   └── orders_incremental.csv         # Estado después de múltiples Upserts
+├── scripts/
+│   ├── main.py                      # Orquestador del flujo (Pipeline)
+│   ├── utils/
+│   │   ├── data_validation.py        # Limpieza de nulos y deduplicación
+│   │   └── data_transformer.py       # Aplanado de JSON y preparación para el Upsert
+├── requirements.txt
+└── README.md
 
 
 ![image]()
